@@ -5,8 +5,8 @@ set -e
 CTID=9999
 HOSTNAME="timelapse-lxc"
 TEMPLATE="local:vztmpl/debian-12-standard_12.0-1_amd64.tar.zst"
-IP=""
-GW=""
+IP="192.168.100.110/24"
+GW="192.168.100.1"
 DISK_SIZE="4G"
 RAM="1024"
 CPU="2"
