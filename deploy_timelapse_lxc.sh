@@ -10,13 +10,16 @@ GW="192.168.73.1"
 DISK_SIZE="4G"
 RAM="1024"
 CPU="2"
+PASSWORD="timelapse123"
+STORAGE="local"
 
 echo "Création du conteneur LXC $CTID avec hostname $HOSTNAME"
 
 pct create $CTID $TEMPLATE \
   -hostname $HOSTNAME \
-  -password timelapse123 \
+  -password $PASSWORD \
   -net0 name=eth0,ip=$IP,gw=$GW,bridge=vmbr0 \
+  -storage $STORAGE \
   -memory $RAM \
   -cores $CPU \
   -features nesting=1 \
