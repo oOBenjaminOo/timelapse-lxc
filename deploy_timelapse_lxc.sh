@@ -15,7 +15,7 @@ echo "Création du conteneur LXC $CTID avec hostname $HOSTNAME"
 
 pct create $CTID $TEMPLATE \
   -hostname $HOSTNAME \
-  -password root \
+  -password timelapse123 \
   -net0 name=eth0,ip=$IP,gw=$GW,bridge=vmbr0 \
   -memory $RAM \
   -cores $CPU \
