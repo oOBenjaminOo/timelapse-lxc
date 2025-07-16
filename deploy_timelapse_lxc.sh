@@ -2,7 +2,7 @@
 set -e
 
 # Variables modifiables
-CTID=
+CTID=110
 HOSTNAME="timelapse-lxc"
 TEMPLATE="local:vztmpl/debian-12-standard_12.0-1_amd64.tar.zst"
 IP=""
