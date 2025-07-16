@@ -11,7 +11,7 @@ DISK_SIZE="4G"
 RAM="1024"
 CPU="2"
 PASSWORD="timelapse123"
-STORAGE="local-lvm"
+STORAGE=""
 
 echo "Création du conteneur LXC $CTID avec hostname $HOSTNAME"
 
