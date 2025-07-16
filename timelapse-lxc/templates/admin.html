@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Administration</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <h2>Gestion des utilisateurs</h2>
+    <p><a href="{{ url_for('dashboard') }}">⬅ Retour au tableau de bord</a></p>
+
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <h3>Ajouter un utilisateur</h3>
+    <form method="POST">
+      <input type="hidden" name="action" value="add" />
+      <label>Nom :</label>
+      <input type="text" name="username" required />
+      <label>Mot de passe :</label>
+      <input type="password" name="password" required />
+      <label>Rôle :</label>
+      <select name="role" required>
+        <option value="user">user</option>
+        <option value="plus">plus</option>
+        <option value="admin">admin</option>
+      </select>
+      <input type="submit" value="Ajouter" />
+    </form>
+
+    <h3>Utilisateurs existants</h3>
+    <ul>
+      {% for name, info in users.items() %}
+      <li>
+        {{ name }} ({{ info.role }})
+        <form method="POST" class="inline" style="display:inline;">
+          <input type="hidden" name="action" value="delete" />
+          <input type="hidden" name="username" value="{{ name }}" />
+          <button type="submit">Supprimer</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>
