@@ -2,16 +2,16 @@
 set -e
 
 # Variables modifiables
-CTID=110
+CTID=
 HOSTNAME="timelapse-lxc"
 TEMPLATE="local:vztmpl/debian-12-standard_12.0-1_amd64.tar.zst"
-IP="192.168.73.210/24"
-GW="192.168.73.1"
+IP=""
+GW=""
 DISK_SIZE="4G"
 RAM="1024"
 CPU="2"
 PASSWORD="timelapse123"
-STORAGE=""
+STORAGE="local-lvm"
 
 echo "Création du conteneur LXC $CTID avec hostname $HOSTNAME"
 
