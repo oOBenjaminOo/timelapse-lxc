@@ -3,14 +3,15 @@ import os
 import threading
 import time
 import requests
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 
 app = Flask(__name__)
 app.secret_key = "ton_secret"
 
 USERS_FILE = "users.json"
+CONFIG_FILE = "config.json"
 
-# Variables Timelapse (à adapter ou rendre dynamiques)
+# Variables Timelapse (initiales, mais modifiables)
 CAM_IP = "192.168.20.20"
 USER = "timelapse"
 PASS = "time1234"
@@ -18,7 +19,27 @@ CODE = "GotoPreset"
 ARG1 = 0.1
 ARG2 = -0.04
 ARG3 = 0
-SAVE_DIR = os.path.expanduser("~/Bureau/timelapse-chantier-MAS")
+
+# --- Gestion config dynamique ---
+
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            return json.load(f)
+    else:
+        # Valeur par défaut
+        return {"save_dir": os.path.expanduser("~/Bureau/timelapse-chantier-MAS")}
+
+def save_config(config):
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(config, f, indent=2)
+
+config = load_config()
+
+def get_save_dir():
+    return config.get("save_dir", os.path.expanduser("~/Bureau/timelapse-chantier-MAS"))
+
+# ------------------------------
 
 timelapse_thread = None
 timelapse_running = False
@@ -66,25 +87,24 @@ def get_user_role(username):
 def timelapse_loop():
     global timelapse_running
     import datetime
-    import subprocess
-
-    if not os.path.exists(SAVE_DIR):
-        os.makedirs(SAVE_DIR)
 
     while timelapse_running:
+        save_dir = get_save_dir()
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
         now = datetime.datetime.now()
         hour = now.hour
         minute = now.minute
 
         if 6 <= hour <= 20 and minute == 0:
             timestamp = now.strftime("%Y%m%d_%H%M%S")
-            filename = os.path.join(SAVE_DIR, f"{timestamp}.jpg")
+            filename = os.path.join(save_dir, f"{timestamp}.jpg")
 
-            # Commande web PTZ
             ptz_url = f"http://{USER}:{PASS}@{CAM_IP}/cgi-bin/ptz.cgi?action=moveAbsolutely&channel=1&code={CODE}&arg1={ARG1}&arg2={ARG2}&arg3={ARG3}"
             try:
                 requests.get(ptz_url, timeout=5)
-                time.sleep(10)  # attente 10 secondes
+                time.sleep(10)
                 snapshot_url = f"http://{USER}:{PASS}@{CAM_IP}/cgi-bin/snapshot.cgi"
                 r = requests.get(snapshot_url, timeout=10)
                 if r.status_code == 200:
@@ -96,7 +116,7 @@ def timelapse_loop():
             except Exception as e:
                 print(f"Erreur lors de la capture: {e}")
 
-            time.sleep(60)  # éviter doublons
+            time.sleep(60)
         else:
             time.sleep(30)
 
@@ -153,6 +173,25 @@ def admin():
         users = load_users()
 
     return render_template("admin.html", users=users, message=message)
+
+@app.route("/admin/config", methods=["GET", "POST"])
+def admin_config():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    username = session["username"]
+    role = get_user_role(username)
+    if role != "admin":
+        return "Accès refusé", 403
+
+    message = None
+    if request.method == "POST":
+        new_save_dir = request.form.get("save_dir")
+        if new_save_dir:
+            config["save_dir"] = new_save_dir
+            save_config(config)
+            message = "Chemin de sauvegarde mis à jour."
+
+    return render_template("admin_config.html", config=config, message=message)
 
 @app.route("/control", methods=["POST"])
 def control():
